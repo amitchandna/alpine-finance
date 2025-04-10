@@ -1,0 +1,1 @@
+select section_one from raw_ten_k_data where section_one is not null limit 1;

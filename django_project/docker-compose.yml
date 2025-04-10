@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+    postgres:
+        image: postgres:latest
+        container_name: alpine-finance
+        restart: always
+        environment:
+          - POSTGRES_USER=amit_chandna
+          - POSTGRES_PASSWORD=oX6PozwzvIVfSG
+          - POSTGRES_DB=alfin_lakes
+        logging:
+          options:
+            max-size: 10m
+            max-file: "3"
+        ports:
+          - '5432:5432'
+        volumes:
+       #   - /Volumes/ext_storage/af_db/:/var/lib/postgresql/data
+          - /Users/amitchandna/Documents/alpine_finance/af_db/:/var/lib/postgresql/data

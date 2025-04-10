@@ -1,0 +1,1 @@
+select ticker from security_details;
