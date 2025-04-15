@@ -43,13 +43,13 @@ Before being able to run anything, navigate to the root directory, and run the s
   - The data will go from the upper_lake to the lower_lake (like in real life)
 
 
-### Machine Learning (NLP)
+### Machine Learning (Unsupervised Learning - DBSCAN)
 
 
 ### Ideal final use case:
 1. Feed in a 10-K form (for US companies) - Eventually replicate to Canada and other markets around the world.
-2. Convert this 100+ pages of text into a data structure that can be ingested by an NLP model
-3. Have the NLP model spit back a set of metrics (both mathematical and sentiment)
+2. Convert this 100+ pages of text into a json blob that can be clustered to see similarities between similar 10-ks
+3. Have the model spit back a set of metrics to help assess its performance
 4. Return a decision to the user as to whether-or-not the company is a good investment on a numbers basis
    1. Provide a list of the metrics this was made on and what the threshold was to reach this recommendation
 5. Return a decision to the user as to whether-or-not the company is a good investment on a sentiment basis from the report
