@@ -5,8 +5,8 @@ services:
         container_name: alpine-finance
         restart: always
         environment:
-          - POSTGRES_USER=amit_chandna
-          - POSTGRES_PASSWORD=oX6PozwzvIVfSG
+          - POSTGRES_USER=user
+          - POSTGRES_PASSWORD=password
           - POSTGRES_DB=alfin_lakes
         logging:
           options:
