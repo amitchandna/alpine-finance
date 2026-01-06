@@ -12,8 +12,8 @@ class FinancialQAService:
     
     def __init__(
         self,
-        ollama_model: str = 'tinyllama',
-        embedding_size: int = 384,
+        ollama_model: str = 'llama3.2:1b',
+        embedding_size: str = 'small_384',
         ollama_url: str = 'http://localhost:11434'
     ):
         self.model = ollama_model
@@ -126,6 +126,8 @@ Answer:"""
                 },
                 timeout=120
             )
+            print(f"🔍 DEBUG: Response status: {response.status_code}")
+            print(f"🔍 DEBUG: Response body: {response.text[:200]}")
             
             if response.status_code != 200:
                 return {

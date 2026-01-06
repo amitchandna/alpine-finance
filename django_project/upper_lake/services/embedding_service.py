@@ -9,11 +9,11 @@ import numpy as np
 # Model configurations
 MODELS = {
     'small_384': {
-        'name': 'BAAI/bge-small-en-v1.5',
+        'name': 'all-MiniLM-L6-v2',
         'dimensions': 384
     },
     'medium_768': {
-        'name': 'BAAI/bge-base-en-v1.5',
+        'name': 'all-mpnet-base-v2',
         'dimensions': 768
     },
     'large_1024': {
