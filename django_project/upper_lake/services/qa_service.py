@@ -25,9 +25,6 @@ class FinancialQAService:
     def ask(
         self,
         question: str,
-        ticker: Optional[str] = None,
-        year: Optional[int] = None,
-        section: Optional[str] = None,
         top_k: int = 5,
         temperature: float = 0.3
     ) -> Dict:
@@ -46,18 +43,11 @@ class FinancialQAService:
             Dictionary with answer, sources, and metadata
         """
         # Auto-detect ticker if not provided
-        if ticker is None:
-            ticker = self._extract_ticker(question)
-            if ticker:
-                print(f"🎯 Auto-detected ticker: {ticker}")
 
         # Step 1: Retrieve relevant chunks
         chunks = self.search_service.search(
             query=question,
-            top_k=top_k,
-            ticker=ticker,
-            year=year,
-            section=section
+            top_k=top_k
         )
 
         if not chunks:
@@ -81,9 +71,7 @@ class FinancialQAService:
                 'cost': 0.0,
                 'tokens': answer_data.get('tokens', 0),
                 'avg_similarity': sum(c['similarity'] for c in chunks) / len(chunks),
-                'model': self.model,
-                'ticker_filter': ticker,
-                'year_filter': year
+                'model': self.model
             }
         }
 

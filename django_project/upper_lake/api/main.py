@@ -35,37 +35,39 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global service instance
+# Global service instance and config
 qa_service = None
+current_config = {
+    'ollama_model': os.getenv('OLLAMA_MODEL', 'tinyllama'),
+    'embedding_size': os.getenv('EMBEDDING_SIZE', 'small_384'),
+    'ollama_url': os.getenv('OLLAMA_URL', 'http://localhost:11434'),
+    'temperature': 0.3
+}
 
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup."""
     global qa_service
-    
+
     try:
         print("\n" + "="*60)
         print("Initializing Alpine Finance API...")
         print("="*60)
-        
-        ollama_model = os.getenv('OLLAMA_MODEL', 'tinyllama')
-        embedding_size = os.getenv('EMBEDDING_SIZE', 'small_384')
-        ollama_url = os.getenv('OLLAMA_URL', 'http://localhost:11434')
-        
-        print(f"Using Ollama model: {ollama_model}")
-        print(f"Using embedding size: {embedding_size}")
-        
+
+        print(f"Using Ollama model: {current_config['ollama_model']}")
+        print(f"Using embedding size: {current_config['embedding_size']}")
+
         qa_service = FinancialQAService(
-            ollama_model=ollama_model,
-            embedding_size=embedding_size,
-            ollama_url=ollama_url
+            ollama_model=current_config['ollama_model'],
+            embedding_size=current_config['embedding_size'],
+            ollama_url=current_config['ollama_url']
         )
-        
+
         print("✓ QA service initialized successfully")
         print("✓ API ready to accept requests")
         print("="*60 + "\n")
-        
+
     except Exception as e:
         print(f"\n✗ Failed to initialize: {e}\n")
         import traceback
@@ -79,7 +81,7 @@ class QueryRequest(BaseModel):
     year: Optional[int] = None
     section: Optional[str] = None
     top_k: int = 5
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -111,10 +113,10 @@ async def root():
 async def ask_question(request: QueryRequest):
     """
     Ask a question about SEC 10-K filings.
-    
+
     Args:
         request: Query parameters
-    
+
     Returns:
         Answer with sources and metadata
     """
@@ -123,7 +125,7 @@ async def ask_question(request: QueryRequest):
             status_code=503,
             detail="Service not initialized. Check server logs."
         )
-    
+
     try:
         print(f"\n{'='*60}")
         print(f"📝 Query: {request.question[:100]}...")
@@ -132,7 +134,7 @@ async def ask_question(request: QueryRequest):
         if request.year:
             print(f"   Year: {request.year}")
         print(f"{'='*60}\n")
-        
+
         result = qa_service.ask(
             question=request.question,
             ticker=request.ticker,
@@ -140,9 +142,9 @@ async def ask_question(request: QueryRequest):
             section=request.section,
             top_k=request.top_k
         )
-        
+
         return result
-    
+
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -177,6 +179,71 @@ async def get_stats():
             'error': 'Failed to fetch statistics',
             'details': str(e)
         }
+
+
+@app.get("/config")
+async def get_config():
+    """Get current configuration."""
+    return {
+        'ollama_model': current_config['ollama_model'],
+        'embedding_size': current_config['embedding_size'],
+        'ollama_url': current_config['ollama_url'],
+        'temperature': current_config['temperature']
+    }
+
+
+class ConfigUpdate(BaseModel):
+    """Configuration update model."""
+    ollama_model: Optional[str] = None
+    embedding_size: Optional[str] = None
+    temperature: Optional[float] = None
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "ollama_model": "llama3.2:3b",
+                "embedding_size": "small_384",
+                "temperature": 0.3
+            }
+        }
+
+
+@app.post("/config")
+async def update_config(config: ConfigUpdate):
+    """Update configuration and reinitialize services."""
+    global qa_service, current_config
+
+    try:
+        # Update config
+        if config.ollama_model:
+            current_config['ollama_model'] = config.ollama_model
+        if config.embedding_size:
+            current_config['embedding_size'] = config.embedding_size
+        if config.temperature is not None:
+            current_config['temperature'] = config.temperature
+
+        # Reinitialize QA service with new config
+        print(f"\n🔄 Updating configuration...")
+        print(f"   Model: {current_config['ollama_model']}")
+        print(f"   Embedding: {current_config['embedding_size']}")
+        print(f"   Temperature: {current_config['temperature']}")
+
+        qa_service = FinancialQAService(
+            ollama_model=current_config['ollama_model'],
+            embedding_size=current_config['embedding_size'],
+            ollama_url=current_config['ollama_url']
+        )
+
+        print("✓ Configuration updated successfully\n")
+
+        return {
+            'status': 'success',
+            'message': 'Configuration updated successfully',
+            'config': current_config
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

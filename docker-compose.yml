@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: pgvector/pgvector:pg15
+    image: pgvector/pgvector:pg16
     container_name: alpine-postgres
     environment:
       POSTGRES_DB: alfin_lakes
@@ -12,68 +12,75 @@ services:
       - "5432:5432"
     volumes:
       - /Users/amitchandna/Documents/alpine_finance/af_db/:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U amit_chandna"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-#    networks:
-#      - alpine-network
-#
-#  ollama:
-#    image: ollama/ollama:latest
-#    container_name: alpine-ollama
-#    ports:
-#      - "11434:11434"
-#    volumes:
-#      - ollama-data:/root/.ollama
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 60s
-#    networks:
-#      - alpine-network
-#
+          test: [ "CMD-SHELL", "pg_isready -U amit_chandna -d alfin_lakes" ]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+    networks:
+      - alpine-network
+    # This allows the Postgres container to easily resolve your Mac's IP
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 #  api:
-#    build: .
-#    container_name: alpine-api
+#      build:
+#        context: .
+#        dockerfile: Dockerfile
+#      container_name: alpine-api
+#      restart: always
+#      depends_on:
+#        postgres:
+#          condition: service_healthy
+#      environment:
+#        DB_NAME: alfin_lakes
+#        DB_USER: amit_chandna
+#        DB_PASSWORD: oX6PozwzvIVfSG
+#        DB_HOST: postgres
+#        DB_PORT: 5432
+#        OLLAMA_URL: http://ollama:11434
+#        OLLAMA_MODEL: tinyllama
+#        EMBEDDING_SIZE: small_384
+#      ports:
+#        - "8000:8000"
+#      volumes:
+#        - ./django_project:/app
+#      working_dir: /app
+#      command: >
+#        bash -c "
+#          echo '======================================' &&
+#          echo 'Waiting for services...' &&
+#          echo '======================================' &&
+#          sleep 10 &&
+#          echo '' &&
+#          echo '======================================' &&
+#          echo 'Starting API server...' &&
+#          echo '======================================' &&
+#          uvicorn upper_lake.api.main:app --host 0.0.0.0 --port 8000 --reload
+#        "
+#      networks:
+#        - alpine-network
+#
+#  frontend:
+#    image: nginx:alpine
+#    container_name: alpine-frontend
+#    restart: always
 #    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      ollama:
-#        condition: service_healthy
-#    environment:
-#      DB_NAME: alfin_lakes
-#      DB_USER: amit_chandna
-#      DB_PASSWORD: oX6PozwzvIVfSG
-#      DB_HOST: postgres
-#      DB_PORT: 5432
-#      OLLAMA_URL: http://ollama:11434
-#      OLLAMA_MODEL: tinyllama
-#      EMBEDDING_SIZE: small_384
+#      - api
 #    ports:
-#      - "8000:8000"
+#      - "3000:80"
 #    volumes:
-#      - ./django_project:/app
-#    working_dir: /app
-#    command: >
-#      bash -c "
-#        echo 'Waiting for services...' &&
-#        sleep 10 &&
-#        echo 'Running migrations...' &&
-#        python manage.py migrate --noinput &&
-#        echo 'Starting API server...' &&
-#        uvicorn upper_lake.api.main:app --host 0.0.0.0 --port 8000 --reload
-#      "
+#      - ./frontend.html:/usr/share/nginx/html/index.html:ro
+#      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 #    networks:
 #      - alpine-network
-#
-#networks:
-#  alpine-network:
-#    driver: bridge
-#
-#volumes:
-#  postgres-data:
-#  ollama-data:
+
+networks:
+  alpine-network:
+    driver: bridge
+
+
+volumes:
+  postgres-data:
+  ollama-data:
