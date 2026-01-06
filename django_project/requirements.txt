@@ -1,0 +1,28 @@
+# Core Django
+Django==4.2.7
+psycopg2-binary==2.9.9
+django-environ==0.11.2
+
+# pgvector support
+pgvector==0.2.4
+
+# FastAPI
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# ML/Embeddings
+sentence-transformers==2.2.2
+torch==2.1.1
+transformers==4.35.2
+numpy==1.24.3
+
+# Text processing
+tiktoken==0.5.1
+
+# HTTP
+requests==2.31.0
+
+# Utilities
+python-dotenv==1.0.0
